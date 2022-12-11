@@ -1,9 +1,16 @@
 const express = require('express');
 const morgan = require('morgan');
-
+const mongoose = require('mongoose');
+const Blog = require('./models/blog');
+const { result } = require('lodash');
 //app
 const app = express();
 
+//connect to mongoDb
+const dbURI = 'mongodb+srv://netninja:sVv9dX2Z9ZvW2NP@nodetutorial.dznvnls.mongodb.net/nodetutorial?retryWrites=true&w=majority'
+mongoose.connect(dbURI)
+    .then((result) => console.log('connected to db'))
+    .catch((err) => console.log(err));
 //register view engine
 app.set('view engine', 'ejs');
 
@@ -16,26 +23,13 @@ app.use(express.static('public'));
 app.use(morgan('dev'));
 
 app.use((req, res, next) => {
-    console.log('new request made: ');
-    console.log('host: ', req.hostname);
-    console.log('host: ', req.path);
-    console.log('host: ', req.method);
-    next();
-});
-
-
-app.get('/', (req,res)=>{
-    const blogs = [
-        {title: 'Yoshi finds eggs', snippet: 'More placeholder text'},
-        {title: 'Mario finds stars', snippet: 'More placeholder text'},
-        {title: 'How to defeat Bowser', snippet: 'More placeholder text'},
-    ];
-    res.render('index', { title: 'Home', blogs});
-});
-
-app.use((req, res, next) => {
     console.log('in the next middleware');
     next();
+});
+
+//routes
+app.get('/', (req,res)=>{
+    res.redirect('/blogs');
 });
 
 app.get('/about', (req, res) =>{
@@ -43,6 +37,16 @@ app.get('/about', (req, res) =>{
     res.render('about', { title: 'About'})
 });
 
+//blog routes
+app.get('/blogs', (req, res) => {
+    Blog.find().sort({ createdAt: -1 })
+    .then((result) => {
+        res.render('index', { title: 'All Blogs', blogs: result})
+    })
+    .catch((err) => {
+        console.log(err);
+    })
+})
 
 app.get('/blogs/create', (req, res)=>{
     res.render('create', { title: 'Create a new Blog'})
