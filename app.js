@@ -1,5 +1,6 @@
-const { response } = require('express');
 const express = require('express');
+const morgan = require('morgan');
+
 //app
 const app = express();
 
@@ -10,6 +11,19 @@ app.set('view engine', 'ejs');
 
 app.listen(3000);
 
+//middleware and static
+app.use(express.static('public'));
+app.use(morgan('dev'));
+
+app.use((req, res, next) => {
+    console.log('new request made: ');
+    console.log('host: ', req.hostname);
+    console.log('host: ', req.path);
+    console.log('host: ', req.method);
+    next();
+});
+
+
 app.get('/', (req,res)=>{
     const blogs = [
         {title: 'Yoshi finds eggs', snippet: 'More placeholder text'},
@@ -17,6 +31,11 @@ app.get('/', (req,res)=>{
         {title: 'How to defeat Bowser', snippet: 'More placeholder text'},
     ];
     res.render('index', { title: 'Home', blogs});
+});
+
+app.use((req, res, next) => {
+    console.log('in the next middleware');
+    next();
 });
 
 app.get('/about', (req, res) =>{
