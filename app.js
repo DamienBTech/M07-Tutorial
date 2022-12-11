@@ -40,6 +40,11 @@ app.get('/about', (req, res) =>{
 });
 
 //blog routes
+app.get('/blogs/create', (req, res)=>{
+    res.render('create', { title: 'Create a new Blog'})
+})
+
+
 app.get('/blogs', (req, res) => {
     Blog.find().sort({ createdAt: -1 })
     .then((result) => {
@@ -73,9 +78,18 @@ app.get('/blogs/:id', (req, res) => {
         });
 })
 
-app.get('/blogs/create', (req, res)=>{
-    res.render('create', { title: 'Create a new Blog'})
+app.delete('/blogs/:id', (req, res) =>{
+    const id = req.params.id;
+
+    Blog.findByIdAndDelete(id)
+    .then(result => {
+        res.json({redirect:'/blogs'});
+    })
+    .catch(err => {
+        console.log(err)
+    })
 })
+
 
 //404 (LAST)
 app.use((req, res) => {
